@@ -13,7 +13,7 @@
 
 # In the next python cell we load in required libraries for this section of the project.
 
-# In[4]:
+# In[1]:
 
 
 import numpy as np
@@ -27,7 +27,7 @@ print("done")
 # 
 # Select an image to perform facial keypoint detection on; you can select any image of faces in the `images/` directory.
 
-# In[5]:
+# In[7]:
 
 
 import cv2
@@ -54,7 +54,7 @@ plt.imshow(image)
 # <img src='images/haar_cascade_ex.png' width=80% height=80%/>
 # 
 
-# In[6]:
+# In[8]:
 
 
 # load in a haar cascade classifier for detecting frontal faces
@@ -85,7 +85,7 @@ plt.imshow(image_with_detections)
 # 
 # First, load your best model by its filename.
 
-# In[7]:
+# In[9]:
 
 
 import torch
@@ -95,7 +95,7 @@ net = Net()
 net = net.float()
 ## TODO: load the best saved model parameters (by your path name)
 ## You'll need to un-comment the line below and add the correct name for *your* saved model
-net.load_state_dict(torch.load('saved_models/keypoints_model_leaky_relu_3.pt'))
+net.load_state_dict(torch.load('saved_models/keypoints_model_leaky_relu_light_2.pt'))
 
 ## print out your net and prepare it for testing (uncomment the line below)
 net.eval()
@@ -127,7 +127,7 @@ net.eval()
 # 
 # 
 
-# In[8]:
+# In[10]:
 
 
 def show_all_keypoints(image, predicted_key_pts, gt_pts=None):
@@ -141,28 +141,23 @@ def show_all_keypoints(image, predicted_key_pts, gt_pts=None):
         plt.scatter(gt_pts[:, 0], gt_pts[:, 1], s=20, marker='.', c='g')
 def visualize_output(image, test_outputs, gt_pts=None, batch_size=1):
 
-    plt.figure(figsize=(20,10))
-    ax = plt.subplot(1, batch_size, i+1)
-
-
     # un-transform the predicted key_pts data
 
     predicted_key_pts = test_outputs.numpy()
-    #predicted_key_pts = np.transpose(predicted_key_pts, (0, 2, 1))
+    predicted_key_pts = np.transpose(predicted_key_pts, (0, 2, 1))
     # undo normalization of keypoints  
-    predicted_key_pts = predicted_key_pts*60.0+100
+    predicted_key_pts = predicted_key_pts*100.0+1000
     # plot ground truth points for comparison, if they exist
     ground_truth_pts = gt_pts
     if gt_pts is not None:
         ground_truth_pts = gt_pts[i]         
-        ground_truth_pts = ground_truth_pts*50.0+100
+        ground_truth_pts = ground_truth_pts+600
     # call show_all_keypoints
     show_all_keypoints(np.squeeze(image), predicted_key_pts, gt_pts)
-    plt.axis('off')
     plt.show()
 
 
-# In[9]:
+# In[11]:
 
 
 from torchvision  import transforms
@@ -196,7 +191,7 @@ for (x,y,w,h) in faces:
     ret = net(torch.from_numpy(rescaled).unsqueeze(0)[None,...].float()).detach()
     
     print(ret.shape)
-    ret = ret.view(ret.size()[0], 68, -1)
+    ret = ret.view(ret.size()[0], -1, 2)
     ## TODO: Display each detected face and the corresponding keypoints        
     # call it
     visualize_output(rescaled,ret , None)
@@ -204,6 +199,8 @@ print("done")
 
 
 # In[ ]:
+
+
 
 
 
